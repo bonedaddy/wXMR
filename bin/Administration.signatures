@@ -1,0 +1,4 @@
+f851a440: admin()
+8da5cb5b: owner()
+704b6c02: setAdmin(address)
+f2fde38b: transferOwnership(address)

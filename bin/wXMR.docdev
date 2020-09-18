@@ -1,0 +1,80 @@
+{
+  "kind": "dev",
+  "methods":
+  {
+    "allowance(address,address)":
+    {
+      "params":
+      {
+        "_owner": "The address of the token owner",
+        "_spender": "The address of thhe person allowed to spend funds on behalf of the owner"
+      }
+    },
+    "approve(address,uint256)":
+    {
+      "params":
+      {
+        "_spender": "This is the person who can spend on your behalf",
+        "_value": "This is the amount of tokens that they can spend"
+      }
+    },
+    "balanceOf(address)":
+    {
+      "params":
+      {
+        "_holder": "The address of the token holder"
+      }
+    },
+    "burn(uint256,bytes32)":
+    {
+      "params":
+      {
+        "_moneroAddressHash": "you must present the address to the web portal which will validate the hash, along with the transaction it was burned in"
+      }
+    },
+    "decreaseApproval(address,uint256)":
+    {
+      "details": "Decrease the amount of tokens that an owner allowed to a spender. approve should be called when allowed[_spender] == 0. To decrement allowed value is better to use this function to avoid 2 calls (and wait until the first transaction is mined) From MonolithDAO Token.sol",
+      "params":
+      {
+        "_spender": "The address which will spend the funds.",
+        "_subtractedValue": "The amount of tokens to decrease the allowance by."
+      }
+    },
+    "increaseApproval(address,uint256)":
+    {
+      "details": "Increase the amount of tokens that an owner allowed to a spender. approve should be called when allowed[_spender] == 0. To increment allowed value is better to use this function to avoid 2 calls (and wait until the first transaction is mined) From MonolithDAO Token.sol",
+      "params":
+      {
+        "_addedValue": "The amount of tokens to increase the allowance by.",
+        "_spender": "The address which will spend the funds."
+      }
+    },
+    "mint(address,uint256)":
+    {
+      "details": "Can only be executed by the staking, and merged miner validator contracts",
+      "params":
+      {
+        "_amount": "This is the amount of tokens that they will receive and which will be generated",
+        "_recipient": "This is the person who will received the mint tokens"
+      }
+    },
+    "transfer(address,uint256)":
+    {
+      "params":
+      {
+        "_amount": "This is the amount of tokens to send",
+        "_recipient": "This is the recipient of the transfer"
+      }
+    },
+    "transferFrom(address,address,uint256)":
+    {
+      "params":
+      {
+        "_amount": "This is the amount of tokens to send",
+        "_recipient": "This is the recipient of the transfer"
+      }
+    }
+  },
+  "version": 1
+}
