@@ -1,0 +1,39 @@
+{
+  "kind": "user",
+  "methods":
+  {
+    "allowance(address,address)":
+    {
+      "notice": "Used to get the allowance of someone"
+    },
+    "approve(address,uint256)":
+    {
+      "notice": "This is used to approve someone to send tokens on your behalf"
+    },
+    "balanceOf(address)":
+    {
+      "notice": "Used to get the balance of a holder"
+    },
+    "burn(uint256,bytes32)":
+    {
+      "notice": "burns wXMR so that the underlying XMR may be redeemed"
+    },
+    "mint(address,uint256)":
+    {
+      "notice": "This is used to mint new tokens"
+    },
+    "setExchangeRate(uint256)":
+    {
+      "notice": "used to set the current USD exchange rate for XMR"
+    },
+    "transfer(address,uint256)":
+    {
+      "notice": "Used to transfer tokens"
+    },
+    "transferFrom(address,address,uint256)":
+    {
+      "notice": "Used to transfer tokens on behalf of someone else"
+    }
+  },
+  "version": 1
+}

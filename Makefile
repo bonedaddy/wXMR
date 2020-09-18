@@ -4,11 +4,22 @@ build:
 	
 .PHONY: contracts
 contracts:
-		solc --bin --abi --optimize --optimize-runs 200 --hashes --devdoc --userdoc --pretty-json --output-dir=bin contracts/wXMR.sol
+		solc \
+			--bin \
+			--abi \
+			--optimize \
+			--optimize-runs 200 \
+			--hashes \
+			--devdoc \
+			--userdoc \
+			--pretty-json \
+			--output-dir=bin \
+			--overwrite \
+			contracts/Reserve.sol
 
 .PHONY: bindings
 bindings:
-	abigen --pkg wxmr --abi bin/wXMR.abi --bin bin/wXMR.bin --out bindings/wxmr/wxmr.go
+	abigen --pkg reserve --abi bin/wXMR.abi --bin bin/wXMR.bin --out bindings/reserve/reserve.go
 
 .PHONY: start-testenv
 start-testenv:

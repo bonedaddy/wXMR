@@ -22,14 +22,6 @@
     {
       "notice": "This is used to mint new tokens"
     },
-    "postReserveProof(bytes)":
-    {
-      "notice": "updates a reserve proof from the multisig wallet"
-    },
-    "setExchangeRate(uint256)":
-    {
-      "notice": "used to set the current USD exchange rate for XMR"
-    },
     "transfer(address,uint256)":
     {
       "notice": "Used to transfer tokens"

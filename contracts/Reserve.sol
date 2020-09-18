@@ -5,11 +5,12 @@ import "./wXMR.sol";
 
 contract Reserve is Administration, wXMR {
 
-    uint256 public              lastProofHeight = 0;
-    uint256 public              exchangeRateUSD = 0; // denotes the current USD exchange rate for 1 XMR
+    uint256 public  lastProofHeight = 0;
+    uint256 public  exchangeRateUSD = 0; // denotes the current USD exchange rate for 1 XMR
+    bytes   public  reserveAddress; // address of the monero wallet functioning as a reserve
 
     struct Proof {
-        bytes signature;
+        bytes32 signatureKeccakHash;
         bytes message;
         bytes reserveAddress;
         uint256 moneroBlockHeight;
@@ -18,32 +19,33 @@ contract Reserve is Administration, wXMR {
 
     mapping(uint256 => Proof) public proofs;
 
-    event ProofSubmitted(bytes _signature, uint256 _blockNumber);
+    event ProofSubmitted(bytes32 _signatureKeccakHash, uint256 _blockNumber);
 
-    constructor() {
+    constructor(bytes memory _reserveAddress) {
         owner = msg.sender;
         admin = msg.sender;
         priceFeed = msg.sender;
+        reserveAddress = _reserveAddress;
     }
 
     function postReserveProof(
-        bytes memory _proof,
         bytes memory _message,
         bytes memory _reserveAddress,
+        bytes32 _signatureKeccakHash,
         uint256 _moneroBlockHeight)
         public
         onlyAdmin
         returns (bool)
     {
         proofs[block.number] = Proof({
-            signature: _proof,
+            signatureKeccakHash: _signatureKeccakHash,
             message: _message,
             reserveAddress: _reserveAddress,
             moneroBlockHeight: _moneroBlockHeight,
             totalSupply: totalSupply
         });
         lastProofHeight = block.number;
-        emit ProofSubmitted(_proof, block.number);
+        emit ProofSubmitted(_signatureKeccakHash, block.number);
         return true;
     }
 

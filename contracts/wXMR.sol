@@ -19,7 +19,13 @@ contract wXMR is Administration {
     event Transfer(address indexed _sender, address indexed _recipient, uint256 _amount);
     event Approval(address indexed _owner, address indexed _spender, uint256 _amount);
     event CoinsMinted(address indexed _recipient, uint256 _mintAmount);
-    event CoinsBurned(address indexed _burner, uint256 _burnAmount, bytes32 _moneroAddressHash);
+    event CoinsBurned(address _burner, uint256 _burnAmount, bytes32 _moneroAddressHash);
+
+    constructor() {
+        owner = msg.sender;
+        admin = msg.sender;
+        priceFeed = msg.sender;
+    }
 
     /** @notice Used to transfer tokens
         * @param _recipient This is the recipient of the transfer

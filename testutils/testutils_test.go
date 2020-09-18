@@ -9,10 +9,10 @@ import (
 func TestBlockchain(t *testing.T) {
 	blockchain := NewBlockchain(t)
 
-	addr, xmr, err := blockchain.DeployWXMR()
+	addr, xmr, err := blockchain.DeployReserve()
 	require.NoError(t, err)
 
 	t.Logf("contract addresss: %s\n", addr.String())
 
-	require.NoError(t, blockchain.Mint(xmr, blockchain.auth.From, oneEthInWei))
+	require.NoError(t, blockchain.Mint(xmr, blockchain.auth.From, OneEthInWei))
 }

@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bonedaddy/wxmr/bindings/wxmr"
+	"github.com/bonedaddy/wxmr/bindings/reserve"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	oneEthInWei = big.NewInt(1000000000000000000)
+	OneEthInWei = big.NewInt(1000000000000000000)
 )
 
 type Blockchain struct {
@@ -38,9 +38,9 @@ func NewBlockchain(t *testing.T) *Blockchain {
 	return &Blockchain{auth, sim}
 }
 
-// DeployWXMR is used to deploy the wXMR contract on a test blockchain
-func (b *Blockchain) DeployWXMR() (common.Address, *wxmr.Wxmr, error) {
-	addr, tx, contract, err := wxmr.DeployWxmr(b.auth, b)
+// DeployReserve is used to deploy the wXMR reserve contract on a test blockchain
+func (b *Blockchain) DeployReserve() (common.Address, *reserve.Reserve, error) {
+	addr, tx, contract, err := reserve.DeployReserve(b.auth, b)
 	if err != nil {
 		return common.Address{}, nil, err
 	}
@@ -52,7 +52,7 @@ func (b *Blockchain) DeployWXMR() (common.Address, *wxmr.Wxmr, error) {
 }
 
 // Mint is used to mint wXMR tokens
-func (b *Blockchain) Mint(xmr *wxmr.Wxmr, recipient common.Address, amount *big.Int) error {
+func (b *Blockchain) Mint(xmr *reserve.Reserve, recipient common.Address, amount *big.Int) error {
 	tx, err := xmr.Mint(b.auth, recipient, amount)
 	if err != nil {
 		return err
@@ -60,4 +60,18 @@ func (b *Blockchain) Mint(xmr *wxmr.Wxmr, recipient common.Address, amount *big.
 	b.Commit()
 	_, err = bind.WaitMined(context.Background(), b, tx)
 	return err
+}
+
+func (b *Blockchain) Burn(xmr *reserve.Reserve, amount *big.Int, destAddressHash [32]byte) error {
+	tx, err := xmr.Burn(b.auth, amount, destAddressHash)
+	if err != nil {
+		return err
+	}
+	b.Commit()
+	_, err = bind.WaitMined(context.Background(), b, tx)
+	return err
+}
+
+func (b *Blockchain) Auth() *bind.TransactOpts {
+	return b.auth
 }

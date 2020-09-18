@@ -17,6 +17,25 @@ func main() {
 	app.Usage = "wrapped monero cli"
 	app.Commands = cli.Commands{
 		&cli.Command{
+			Name:  "get-reserve-proof",
+			Usage: "generates a reserve proof",
+			Action: func(c *cli.Context) error {
+				cl, err := client.NewClient(c.String("wallet.rpc_address"))
+				if err != nil {
+					return err
+				}
+				defer func() error {
+					return cl.Close()
+				}()
+				proof, err := cl.GetReserveProof(c.String("wallet.name"))
+				if err != nil {
+					return err
+				}
+				log.Printf("new proof:\n%#v\n", proof)
+				return nil
+			},
+		},
+		&cli.Command{
 			Name:  "new-address",
 			Usage: "generate a new address under the account index",
 			Action: func(c *cli.Context) error {
