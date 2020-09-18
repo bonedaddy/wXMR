@@ -1,0 +1,34 @@
+2020-09-18 05:51:05.200	    7f856f8697c0	INFO	logging	contrib/epee/src/mlog.cpp:273	New log categories: *:WARNING,net:FATAL,net.http:FATAL,net.ssl:FATAL,net.p2p:FATAL,net.cn:FATAL,daemon.rpc:FATAL,global:INFO,verify:FATAL,serialization:FATAL,daemon.rpc.payment:ERROR,stacktrace:INFO,logging:INFO,msgwriter:INFO
+2020-09-18 05:51:05.201	    7f856f8697c0	INFO	global	contrib/epee/include/net/http_server_impl_base.h:79	Binding on 127.0.0.1 (IPv4):6061
+2020-09-18 05:51:05.815	    7f856f8697c0	WARNING	wallet.rpc	src/wallet/wallet_rpc_server.cpp:4414	Starting wallet RPC server
+2020-09-18 05:51:27.501	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'asa' is shorter than its prefix length, 4
+2020-09-18 05:51:27.501	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'ave' is shorter than its prefix length, 4
+2020-09-18 05:51:27.501	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'boa' is shorter than its prefix length, 4
+2020-09-18 05:51:27.502	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'cal' is shorter than its prefix length, 4
+2020-09-18 05:51:27.503	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'dar' is shorter than its prefix length, 4
+2020-09-18 05:51:27.503	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'don' is shorter than its prefix length, 4
+2020-09-18 05:51:27.503	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'dos' is shorter than its prefix length, 4
+2020-09-18 05:51:27.503	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'eco' is shorter than its prefix length, 4
+2020-09-18 05:51:27.503	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'eje' is shorter than its prefix length, 4
+2020-09-18 05:51:27.503	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'fax' is shorter than its prefix length, 4
+2020-09-18 05:51:27.503	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'feo' is shorter than its prefix length, 4
+2020-09-18 05:51:27.504	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'fin' is shorter than its prefix length, 4
+2020-09-18 05:51:27.504	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'gen' is shorter than its prefix length, 4
+2020-09-18 05:51:27.504	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'gol' is shorter than its prefix length, 4
+2020-09-18 05:51:27.504	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'haz' is shorter than its prefix length, 4
+2020-09-18 05:51:27.504	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'ira' is shorter than its prefix length, 4
+2020-09-18 05:51:27.505	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'luz' is shorter than its prefix length, 4
+2020-09-18 05:51:27.505	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'mar' is shorter than its prefix length, 4
+2020-09-18 05:51:27.505	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'mes' is shorter than its prefix length, 4
+2020-09-18 05:51:27.505	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'mil' is shorter than its prefix length, 4
+2020-09-18 05:51:27.506	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'oca' is shorter than its prefix length, 4
+2020-09-18 05:51:27.506	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'ojo' is shorter than its prefix length, 4
+2020-09-18 05:51:27.506	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'ola' is shorter than its prefix length, 4
+2020-09-18 05:51:27.506	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'oro' is shorter than its prefix length, 4
+2020-09-18 05:51:27.506	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'oso' is shorter than its prefix length, 4
+2020-09-18 05:51:27.506	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'pan' is shorter than its prefix length, 4
+2020-09-18 05:51:27.506	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'pez' is shorter than its prefix length, 4
+2020-09-18 05:51:27.506	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'pie' is shorter than its prefix length, 4
+2020-09-18 05:51:27.507	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'red' is shorter than its prefix length, 4
+2020-09-18 05:51:27.507	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'res' is shorter than its prefix length, 4
+2020-09-18 05:51:27.507	[RPC0]	WARNING	default	src/mnemonics/language_base.h:132	Español word 'rey' is shorter than its prefix length, 4

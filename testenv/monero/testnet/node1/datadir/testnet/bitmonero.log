@@ -1,0 +1,28 @@
+2020-09-18 05:51:05.190	    7fc431163780	INFO	logging	contrib/epee/src/mlog.cpp:273	New log categories: *:WARNING,net:FATAL,net.http:FATAL,net.ssl:FATAL,net.p2p:FATAL,net.cn:FATAL,daemon.rpc:FATAL,global:INFO,verify:FATAL,serialization:FATAL,daemon.rpc.payment:ERROR,stacktrace:INFO,logging:INFO,msgwriter:INFO
+2020-09-18 05:51:05.190	    7fc431163780	INFO	global	src/daemon/main.cpp:271	Monero 'Nitrogen Nebula' (v0.16.0.3-release)
+2020-09-18 05:51:05.190	    7fc431163780	INFO	msgwriter	src/common/scoped_message_writer.h:102	Forking to background...
+2020-09-18 05:51:05.190	    7fc431163780	WARNING	daemon	src/daemon/executor.cpp:61	Monero 'Nitrogen Nebula' (v0.16.0.3-release) Daemonised
+2020-09-18 05:51:05.190	    7fc431163780	INFO	global	src/daemon/protocol.h:53	Initializing cryptonote protocol...
+2020-09-18 05:51:05.190	    7fc431163780	INFO	global	src/daemon/protocol.h:58	Cryptonote protocol initialized OK
+2020-09-18 05:51:05.191	    7fc431163780	INFO	global	src/daemon/core.h:63	Initializing core...
+2020-09-18 05:51:05.192	    7fc431163780	INFO	global	src/cryptonote_core/cryptonote_core.cpp:506	Loading blockchain from folder testnet/node1/datadir/testnet/lmdb ...
+2020-09-18 05:51:05.226	    7fc431163780	INFO	global	src/cryptonote_core/cryptonote_core.cpp:668	Loading checkpoints
+2020-09-18 05:51:05.226	    7fc431163780	INFO	global	src/daemon/core.h:73	Core initialized OK
+2020-09-18 05:51:05.226	    7fc431163780	INFO	global	src/daemon/p2p.h:63	Initializing p2p server...
+2020-09-18 05:51:05.228	    7fc431163780	INFO	global	src/daemon/p2p.h:68	p2p server initialized OK
+2020-09-18 05:51:05.228	    7fc431163780	INFO	global	src/daemon/rpc.h:63	Initializing core RPC server...
+2020-09-18 05:51:05.229	    7fc431163780	INFO	global	contrib/epee/include/net/http_server_impl_base.h:79	Binding on 127.0.0.1 (IPv4):28081
+2020-09-18 05:51:06.001	    7fc431163780	INFO	global	src/daemon/rpc.h:69	core RPC server initialized OK on port: 28081
+2020-09-18 05:51:06.001	    7fc431163780	INFO	global	src/daemon/rpc.h:74	Starting core RPC server...
+2020-09-18 05:51:06.002	[SRV_MAIN]	INFO	global	src/daemon/rpc.h:79	core RPC server started ok
+2020-09-18 05:51:06.003	[SRV_MAIN]	INFO	global	src/daemon/p2p.h:78	Starting p2p net loop...
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	**********************************************************************
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	The daemon is running offline and will not attempt to sync to the Monero network.
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	You can set the level of process detailization through "set_log <level|categories>" command,
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	where <level> is between 0 (no details) and 4 (very verbose), or custom category based levels (eg, *:WARNING).
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	Use the "help" command to see the list of available commands.
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	Use "help <command>" to see a command's documentation.
+2020-09-18 05:51:07.003	[P2P0]	INFO	global	src/cryptonote_core/cryptonote_core.cpp:1654	**********************************************************************

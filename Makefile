@@ -1,3 +1,7 @@
+.PHONY: build
+build:
+	go build -o wxmr ./cmd/wxmr
+	
 .PHONY: contracts
 contracts:
 		solc --bin --abi --optimize --optimize-runs 200 --hashes --devdoc --userdoc --pretty-json --output-dir=bin contracts/wXMR.sol
