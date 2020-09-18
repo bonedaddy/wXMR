@@ -5,3 +5,7 @@ contracts:
 .PHONY: bindings
 bindings:
 	abigen --pkg wxmr --abi bin/wXMR.abi --bin bin/wXMR.bin --out bindings/wxmr/wxmr.go
+
+.PHONY: start-testenv
+start-testenv:
+	(cd testenv/monero ; bash start.sh)

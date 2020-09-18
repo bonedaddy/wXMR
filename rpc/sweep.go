@@ -1,4 +1,4 @@
-package client
+package rpc
 
 import "github.com/monero-ecosystem/go-monero-rpc-client/wallet"
 

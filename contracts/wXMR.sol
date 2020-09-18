@@ -7,12 +7,11 @@ contract wXMR is Administration {
 
     using SafeMath for uint256;
 
-    string  constant public  name = "wXMR";
-    string  constant public  symbol = "wXMR";
-    uint256 public  totalSupply = 0;
-    uint256 public exchangeRateUSD = 0; // denotes the current USD exchange rate for 1 XMR
-    uint8   constant public  decimals = 12;
-    bytes   public latestReserveProof;
+    string  constant public     name = "wXMR";
+    string  constant public     symbol = "wXMR";
+    uint8   constant public     decimals = 12;
+    uint256 public              totalSupply = 0;
+
 
     mapping (address => uint256) private balances;
     mapping (address => mapping (address => uint256)) private allowed;
@@ -21,38 +20,6 @@ contract wXMR is Administration {
     event Approval(address indexed _owner, address indexed _spender, uint256 _amount);
     event CoinsMinted(address indexed _recipient, uint256 _mintAmount);
     event CoinsBurned(address indexed _burner, uint256 _burnAmount, bytes32 _moneroAddressHash);
-    event ReserveProofUpdate(bytes _new, bytes _previous);
-
-    constructor() {
-        owner = msg.sender;
-        admin = msg.sender;
-    }
-
-    /** @notice updates a reserve proof from the multisig wallet
-    */
-    function postReserveProof(
-        bytes memory _proof)
-        public
-        onlyAdmin
-        returns (bool)
-    {
-        bytes memory oldProof = latestReserveProof;
-        latestReserveProof = _proof;
-        emit ReserveProofUpdate(_proof, oldProof);
-        return true;
-    }
-
-    /** @notice used to set the current USD exchange rate for XMR
-     */
-    function setExchangeRate(
-        uint256 _rate
-    )
-        public
-        returns (bool)
-    {
-        exchangeRateUSD = _rate;
-        return true;
-    }
 
     /** @notice Used to transfer tokens
         * @param _recipient This is the recipient of the transfer
@@ -114,7 +81,7 @@ contract wXMR is Administration {
     function mint(
         address _recipient,
         uint256 _amount)
-        public // todo: restrict access
+        public
         onlyAdmin
         returns (bool)
     {

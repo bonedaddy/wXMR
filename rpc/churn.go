@@ -1,4 +1,4 @@
-package client
+package rpc
 
 // ChurnableSubAdddress defines a given address that we can churn funds from
 type ChurnableSubAdddress struct {

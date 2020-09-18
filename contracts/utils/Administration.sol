@@ -4,10 +4,15 @@ contract Administration {
 
     address public owner;
     address public admin;
+    address public priceFeed;
 
     event AdminSet(address _admin);
     event OwnershipTransferred(address _previousOwner, address _newOwner);
 
+    modifier onlyPriceFeed() {
+        require(msg.sender == priceFeed);
+        _;
+    }
 
     modifier onlyOwner() {
         require(msg.sender == owner);
