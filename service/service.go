@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
@@ -81,8 +80,5 @@ func (s *Service) startMint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	go func() {
-		// start waiting for transaction to confirm
-		log.Println("waiting for mint to confirm")
-	}()
+	go s.handleNewMint(req.PaymentID, req.EthAddress)
 }
