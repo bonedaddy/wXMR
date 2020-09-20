@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bonedaddy/wxmr/db"
 	mclient "github.com/bonedaddy/wxmr/rpc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -20,19 +21,24 @@ type Service struct {
 	mc         *mclient.Client
 	ec         *ethclient.Client
 	auth       *bind.TransactOpts
+	db         *db.Database
 }
 
-func NewService(listenAddr, walletName string, ec *ethclient.Client, auth *bind.TransactOpts) (*Service, error) {
+func NewService(listenAddr, walletName string, mc *mclient.Client, ec *ethclient.Client, auth *bind.TransactOpts, database *db.Database) (*Service, error) {
 	srv := &Service{
 		walletName: walletName,
 		srv: &http.Server{
 			Addr: listenAddr,
 		},
+		mc:   mc,
+		ec:   ec,
+		auth: auth,
+		db:   database,
 	}
 	r := chi.NewRouter()
 	r.Get("/reserve_proof", srv.getReserveProof)
 	r.Get("/deposit_address", srv.getDepositAddress)
-	r.Post("/mint", srv.mint)
+	r.Post("/mint", srv.startMint)
 	return srv, nil
 }
 
@@ -42,6 +48,10 @@ func (s *Service) getDepositAddress(w http.ResponseWriter, r *http.Request) {
 	pinfo, err := s.mc.NewIntegratedAddress(s.walletName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := s.db.RegisterDeposit(pinfo.IntegratedAddress, pinfo.PaymentID); err != nil {
+		http.Error(w, "failed to create deposit address", http.StatusInternalServerError)
 		return
 	}
 	resp := &ResponseGetDepositAddress{
@@ -56,7 +66,7 @@ func (s *Service) getDepositAddress(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, "", time.Time{}, bytes.NewReader(data))
 }
 
-func (s *Service) mint(w http.ResponseWriter, r *http.Request) {
+func (s *Service) startMint(w http.ResponseWriter, r *http.Request) {
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -67,6 +77,12 @@ func (s *Service) mint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("%+v\n", req)
-	// TODO: queue processing the payment to trigger a mint
+	if err := s.db.NewMint(req.PaymentID, req.EthAddress); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	go func() {
+		// start waiting for transaction to confirm
+		log.Println("waiting for mint to confirm")
+	}()
 }
