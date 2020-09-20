@@ -64,3 +64,17 @@ func (c *Client) AddressBalance(walletName string, address string, accountIndex 
 	}
 	return 0, nil
 }
+
+func (c *Client) NewIntegratedAddress(walletName string) (*wallet.ResponseMakeIntegratedAddress, error) {
+	if err := c.OpenWallet(walletName); err != nil {
+		return nil, err
+	}
+	return c.mw.MakeIntegratedAddress(&wallet.RequestMakeIntegratedAddress{})
+}
+
+func (c *Client) GetPayments(walletName, paymentID string) (*wallet.ResponseGetPayments, error) {
+	if err := c.OpenWallet(walletName); err != nil {
+		return nil, err
+	}
+	return c.mw.GetPayments(&wallet.RequestGetPayments{PaymentID: paymentID})
+}
