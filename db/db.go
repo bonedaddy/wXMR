@@ -16,6 +16,7 @@ func New(dbPath string) (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
+	db.AutoMigrate(&Deposit{}, &Mint{})
 	return &Database{db}, nil
 
 }
