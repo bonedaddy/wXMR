@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -38,7 +39,16 @@ func NewService(listenAddr, walletName string, mc *mclient.Client, ec *ethclient
 	r.Get("/reserve_proof", srv.getReserveProof)
 	r.Get("/deposit_address", srv.getDepositAddress)
 	r.Post("/mint", srv.startMint)
+	srv.srv.Handler = r
 	return srv, nil
+}
+
+func (s *Service) Serve(ctx context.Context) error {
+	go func() {
+		<-ctx.Done()
+		s.srv.Close()
+	}()
+	return s.srv.ListenAndServe()
 }
 
 func (s *Service) getReserveProof(w http.ResponseWriter, r *http.Request) {}
