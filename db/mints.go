@@ -26,9 +26,10 @@ var (
 // Mint represents a given minting event
 type Mint struct {
 	gorm.Model
-	PaymentID  string `gorm:"unique"`
-	EthAddress string
-	State      MintState
+	PaymentID       string `gorm:"unique"`
+	EthAddress      string
+	MintTransaction string
+	State           MintState
 }
 
 // NewMint creates a new mint event
@@ -52,4 +53,13 @@ func (d *Database) SetMintState(paymentID string, state MintState) error {
 func (d *Database) GetMint(paymentID string) (*Mint, error) {
 	var mint Mint
 	return &mint, d.db.Model(&Mint{}).Where("payment_id = ?", paymentID).First(&mint).Error
+}
+
+func (d *Database) SetMintTx(paymentID string, txHash string) error {
+	mint, err := d.GetMint(paymentID)
+	if err != nil {
+		return err
+	}
+	mint.MintTransaction = txHash
+	return d.db.Model(mint).Update("mint_transaction", txHash).Error
 }
