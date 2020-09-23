@@ -34,4 +34,5 @@ func TestDeployReserveContract(t *testing.T) {
 	admin2, err := contract2.Admin(nil)
 	require.NoError(t, err)
 	require.Equal(t, admin, admin2)
+	t.Log("reserve contract address: ", addr.String())
 }

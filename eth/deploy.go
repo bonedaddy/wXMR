@@ -11,7 +11,7 @@ import (
 
 // DeployReserveContract is used to deploy the reserve contract
 func DeployReserveContract(ctx context.Context, auth *bind.TransactOpts, ec *ethclient.Client) (common.Address, *reserve.Reserve, error) {
-	addr, tx, contract, err := reserve.DeployReserve(auth, ec)
+	addr, tx, contract, err := reserve.DeployReserve(auth, ec, auth.From.Bytes())
 	if err != nil {
 		return common.Address{}, nil, err
 	}

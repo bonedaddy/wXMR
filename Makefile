@@ -19,7 +19,7 @@ contracts:
 
 .PHONY: bindings
 bindings:
-	abigen --pkg reserve --abi bin/wXMR.abi --bin bin/wXMR.bin --out bindings/reserve/reserve.go
+	abigen --pkg reserve --abi bin/Reserve.abi --bin bin/Reserve.bin --out bindings/reserve/reserve.go
 
 .PHONY: start-testenv
 start-testenv:
