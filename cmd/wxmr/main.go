@@ -17,6 +17,29 @@ func main() {
 	app.Usage = "wrapped monero cli"
 	app.Commands = cli.Commands{
 		&cli.Command{
+			Name: "get-payments",
+			Action: func(c *cli.Context) error {
+				cl, err := client.NewClient(c.String("wallet.rpc_address"))
+				if err != nil {
+					return err
+				}
+				defer func() error {
+					return cl.Close()
+				}()
+				resp, err := cl.GetBulkPayments(c.String("wallet.name"), c.String("payment.id"))
+				if err != nil {
+					return err
+				}
+				log.Printf("got payments: %#v\n", resp)
+				return nil
+			},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name: "payment.id",
+				},
+			},
+		},
+		&cli.Command{
 			Name:  "get-reserve-proof",
 			Usage: "generates a reserve proof",
 			Action: func(c *cli.Context) error {
@@ -44,6 +67,22 @@ func main() {
 					return err
 				}
 				addr, err := cl.NewAddress(c.String("wallet.name"), c.Uint64("account.index"))
+				if err != nil {
+					return err
+				}
+				fmt.Println("new address: ", addr)
+				return cl.Close()
+			},
+		},
+		&cli.Command{
+			Name:  "new-account",
+			Usage: "generate a new address under the account index",
+			Action: func(c *cli.Context) error {
+				cl, err := client.NewClient(c.String("wallet.rpc_address"))
+				if err != nil {
+					return err
+				}
+				addr, err := cl.NewAccount(c.String("wallet.name"), "")
 				if err != nil {
 					return err
 				}
@@ -298,7 +337,7 @@ func main() {
 			Name:    "wallet.name",
 			Aliases: []string{"wn"},
 			Usage:   "the wallet to use for churning",
-			Value:   "testnetwallet123",
+			Value:   "monerot-estnet",
 		},
 		&cli.StringFlag{
 			Name:    "wallet.rpc_address",

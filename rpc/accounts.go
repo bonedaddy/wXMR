@@ -1,6 +1,8 @@
 package rpc
 
-import "github.com/monero-ecosystem/go-monero-rpc-client/wallet"
+import (
+	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
+)
 
 // NewAccount is used to create a new account with an optional label
 func (c *Client) NewAccount(walletName, label string) (*wallet.ResponseCreateAccount, error) {
@@ -72,9 +74,23 @@ func (c *Client) NewIntegratedAddress(walletName string) (*wallet.ResponseMakeIn
 	return c.mw.MakeIntegratedAddress(&wallet.RequestMakeIntegratedAddress{})
 }
 
+func (c *Client) SplitIntegratedAddress(walletName string) (*wallet.ResponseSplitIntegratedAddress, error) {
+	if err := c.OpenWallet(walletName); err != nil {
+		return nil, err
+	}
+	return c.mw.SplitIntegratedAddress(&wallet.RequestSplitIntegratedAddress{})
+}
+
 func (c *Client) GetPayments(walletName, paymentID string) (*wallet.ResponseGetPayments, error) {
 	if err := c.OpenWallet(walletName); err != nil {
 		return nil, err
 	}
 	return c.mw.GetPayments(&wallet.RequestGetPayments{PaymentID: paymentID})
+}
+
+func (c *Client) GetBulkPayments(walletName, paymentID string) (*wallet.ResponseGetBulkPayments, error) {
+	if err := c.OpenWallet(walletName); err != nil {
+		return nil, err
+	}
+	return c.mw.GetBulkPayments(&wallet.RequestGetBulkPayments{PaymentIDs: []string{paymentID}})
 }

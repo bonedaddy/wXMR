@@ -8,6 +8,7 @@ type ResponseGetDepositAddress struct {
 
 // RequestMint is used to request a minting of wXMR
 type RequestMint struct {
+	Address    string `json:"address"`
 	PaymentID  string `json:"payment_id"`
 	EthAddress string `json:"eth_address"` // the address to send the minted wXMR to
 }

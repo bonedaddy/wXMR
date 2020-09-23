@@ -26,7 +26,16 @@ type TransferOpts struct {
 	AccountIndex   uint64   // defaults to 0
 	SubaddrIndices []uint64 // options, default is nil which means all
 	WalletName     string
+	PaymentID      string
 	DoNotRelay     bool
+}
+
+// TxConfirmed returns whether or not the given transaction is confirmed
+func (c *Client) GetTxID(walletName, txHash string) (*wallet.ResponseGetTransferByTxID, error) {
+	if err := c.OpenWallet(walletName); err != nil {
+		return nil, err
+	}
+	return c.mw.GetTransferByTxID(&wallet.RequestGetTransferByTxID{TxID: txHash})
 }
 
 // TxConfirmed returns whether or not the given transaction is confirmed
@@ -100,6 +109,7 @@ func (c *Client) Transfer(opts TransferOpts) (*wallet.ResponseTransfer, error) {
 		AccountIndex:   opts.AccountIndex,
 		SubaddrIndices: opts.SubaddrIndices,
 		Destinations:   destinations,
+		PaymentID:      opts.PaymentID,
 	})
 }
 
