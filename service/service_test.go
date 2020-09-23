@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"log"
+	"math/big"
 	"net/http"
 	"os"
 	"strings"
@@ -30,10 +32,16 @@ var (
 	reserveContractAddress = "0x56D7C814700e6deD2Ab0173da2BdC57e1532bEd3"
 	id1                    = "d1925a00c1625c3c"
 	addr1                  = "A3jPvu6ZzrBNGUNyHTKU1G9LXcbMspjvtAQyTDdP4ADS4k3VMRudnrejc3w27gQWvPJbJEtKXkcde3yLM639RozHcGCtEPYWhbH7sbiFNN"
-	tx1                    = "5fa93c5c40e9841fe0982cecf921a1a187a89ca2e32a9d2feffb9912e5a5f174" // todo update with payment above
+	tx1                    = "8226e4d3ab5a908e3fb91a8ad9def48444694764c953acf6826a8937467e7cf5"
 )
 
 func TestService(t *testing.T) {
+
+	// set dev mode
+	dev = true
+	// overide dev confirmation count to 1
+	devConfirmationCount = 1
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	mc, err := rpc.NewClient(moneroWalletAddr)
@@ -52,11 +60,12 @@ func TestService(t *testing.T) {
 	})
 	auth, err := bind.NewTransactor(strings.NewReader(ethKeyContents), "")
 	require.NoError(t, err)
-	srv, err := NewService(serviceAddr, moneroWalletName, reserveContractAddress, mc, ec, auth, database)
+	srv, err := NewService(ctx, serviceAddr, moneroWalletName, reserveContractAddress, mc, ec, auth, database)
 	require.NoError(t, err)
 
 	go srv.Serve(ctx)
-
+	// start the hacky miner
+	go ethMine(t, srv)
 	// prepare the test deposit
 	database.RegisterDeposit(addr1, id1)
 
@@ -76,14 +85,13 @@ func TestService(t *testing.T) {
 	require.NoError(t, json.Unmarshal(data, &depResp))
 	t.Logf("deposit request: %s", depResp)
 	/*!
-	this is a temporary work around for a bug with the wallet rpc
+	we dont actually check this transaction due to the time the testnet takes to confirm blocks
+	so we simply use the returned information to make sure we can send a transfer to it, all further
+	testing occurs using a previously confirmed transaction
 	*/
-	// revert this eventually once the bug is fixed
-	depResp.Address = "A7jzffQhMYxVBBD3HuWimYJHeVDS7kB3Za2n1LVjXcXqESHdDnT7xLfjcDeadHGc9mfhvNZSbJJsuFnTU6tyfuhseT37Akf7RPc4HFHEfr"
 	if resp, err := mc.Transfer(rpc.TransferOpts{
 		Priority:     wallet.PriorityElevated,
 		WalletName:   moneroWalletName,
-		PaymentID:    depResp.PaymentID,
 		Destinations: map[string]uint64{depResp.Address: wallet.Float64ToXMR(0.1)},
 	}); err != nil {
 		t.Fatal(err)
@@ -96,8 +104,34 @@ func TestService(t *testing.T) {
 
 	req, err = http.NewRequest("POST", callURL+"/mint", bytes.NewReader(data))
 	require.NoError(t, err)
-	_, err = hc.Do(req)
+	resp, err = hc.Do(req)
 	require.NoError(t, err)
+	defer resp.Body.Close()
+	data, err = ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	log.Println("mint response: ", string(data))
+	time.Sleep(time.Minute * 1)
+}
 
-	time.Sleep(time.Minute * 20)
+// because we start the testenv geth node and set it
+// to only mine blocks when there is a transaction, we need to
+// create transactions to mine so that the tests can run properly
+func ethMine(t *testing.T, s *Service) {
+	for {
+		select {
+		case <-s.ctx.Done():
+			return
+		default:
+		}
+		time.Sleep(time.Second * 1)
+		tx, err := s.rsrv.SetExchangeRate(s.auth, big.NewInt(1))
+		if err != nil {
+			t.Log("mine transaction send failed: ", err.Error())
+			return
+		}
+		if _, err := bind.WaitMined(s.ctx, s.ec, tx); err != nil {
+			t.Log("failed to wait for transaction to be mined: ", err)
+			return
+		}
+	}
 }

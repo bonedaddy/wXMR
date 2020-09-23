@@ -40,7 +40,7 @@ func NewBlockchain(t *testing.T) *Blockchain {
 
 // DeployReserve is used to deploy the wXMR reserve contract on a test blockchain
 func (b *Blockchain) DeployReserve() (common.Address, *reserve.Reserve, error) {
-	addr, tx, contract, err := reserve.DeployReserve(b.auth, b)
+	addr, tx, contract, err := reserve.DeployReserve(b.auth, b, b.auth.From.Bytes())
 	if err != nil {
 		return common.Address{}, nil, err
 	}

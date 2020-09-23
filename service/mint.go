@@ -12,18 +12,21 @@ import (
 
 func (s *Service) handleNewMint(paymentID, ethAddress string) {
 	for {
+		log.Println("getting payments")
 		resp, err := s.mc.GetPayments(s.walletName, paymentID)
 		if err != nil {
 			log.Println("failed to get payments: ", err.Error())
 			return
 		}
 		if len(resp.Payments) < 0 {
+			log.Println("no payments found")
 			time.Sleep(time.Minute * 2)
 			continue
 		}
 		if len(resp.Payments) > 1 {
 			log.Println("ERROR: more than 2 payments found to this address")
 		}
+		log.Println("checking tx confirmation")
 		confirmed, err := s.mc.TxConfirmed(s.walletName, resp.Payments[0].TxHash)
 		if err != nil {
 			log.Println("failed to check tx confirmation status: ", err.Error())
@@ -53,7 +56,7 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 				log.Println("failed to update mint transaction hash: ", err.Error())
 				return
 			}
-			receipt, err := bind.WaitMined(s.auth.Context, s.ec, tx)
+			receipt, err := bind.WaitMined(s.ctx, s.ec, tx)
 			if err != nil {
 				log.Println("failed to wait for transaction to be mined: ", err.Error())
 				return
@@ -68,26 +71,24 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 				blockMinedAt         = receipt.BlockNumber
 				lastBlockChecked     *big.Int
 			)
-			header, err := s.ec.HeaderByNumber(s.auth.Context, nil)
-			if err != nil {
-				log.Println("failed to get current block number: ", err.Error())
+			number := s.getCurrentBlockNumber()
+			if number == nil {
 				return
 			}
-			if header.Number.Cmp(blockMinedAt) == 1 {
-				currentConfirmations = new(big.Int).Sub(header.Number, blockMinedAt)
+			if number.Cmp(blockMinedAt) == 1 {
+				currentConfirmations = new(big.Int).Sub(number, blockMinedAt)
 			}
-			lastBlockChecked = header.Number
+			lastBlockChecked = number
 			for {
 				time.Sleep(time.Minute)
-				header, err := s.ec.HeaderByNumber(s.auth.Context, nil)
-				if err != nil {
-					log.Println("failed to get current block number: ", err.Error())
+				number := s.getCurrentBlockNumber()
+				if number == nil {
 					return
 				}
-				if header.Number.Cmp(lastBlockChecked) == 0 {
+				if number.Cmp(lastBlockChecked) == 0 {
 					continue
 				}
-				currentConfirmations = new(big.Int).Sub(header.Number, lastBlockChecked)
+				currentConfirmations = new(big.Int).Sub(number, lastBlockChecked)
 				if num := currentConfirmations.Cmp(confirmationsNeeded); num == 0 || num == 1 {
 					log.Println("tx confirmed")
 					break
@@ -103,6 +104,15 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 	SLEEP:
 		time.Sleep(time.Minute * 2)
 	}
+}
+
+func (s *Service) getCurrentBlockNumber() *big.Int {
+	header, err := s.ec.HeaderByNumber(s.ctx, nil)
+	if err != nil {
+		log.Println("failed to get current block number: ", err.Error())
+		return nil
+	}
+	return header.Number
 }
 
 func getRequiredConfirmations() *big.Int {

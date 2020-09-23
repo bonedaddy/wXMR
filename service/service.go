@@ -31,9 +31,10 @@ type Service struct {
 	auth       *bind.TransactOpts
 	db         *db.Database
 	rsrv       *reserve.Reserve
+	ctx        context.Context
 }
 
-func NewService(listenAddr, walletName, reserveContractAddress string, mc *mclient.Client, ec *ethclient.Client, auth *bind.TransactOpts, database *db.Database) (*Service, error) {
+func NewService(ctx context.Context, listenAddr, walletName, reserveContractAddress string, mc *mclient.Client, ec *ethclient.Client, auth *bind.TransactOpts, database *db.Database) (*Service, error) {
 	rsrv, err := reserve.NewReserve(common.HexToAddress(reserveContractAddress), ec)
 	if err != nil {
 		return nil, err
@@ -48,6 +49,7 @@ func NewService(listenAddr, walletName, reserveContractAddress string, mc *mclie
 		auth: auth,
 		db:   database,
 		rsrv: rsrv,
+		ctx:  ctx,
 	}
 	r := chi.NewRouter()
 	r.Get("/reserve_proof", srv.getReserveProof)
