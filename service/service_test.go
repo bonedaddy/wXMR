@@ -20,16 +20,17 @@ import (
 )
 
 var (
-	moneroWalletAddr = "http://127.0.0.1:6061/json_rpc"
-	moneroWalletName = "monerot-estnet"
-	serviceAddr      = "127.0.0.1:6666"
-	gethRPC          = "http://127.0.0.1:8545"
-	dbPath           = "test.db"
-	ethKeyContents   = `{"address":"f2ea9ce3a27862650a8d40d98329dc0bd403a0c3","crypto":{"cipher":"aes-128-ctr","ciphertext":"75b1c0181fee4c7fa634a49bac74dacb12dcc27ec157e8549b6374924c5b1272","cipherparams":{"iv":"87117ca98fd0652db342a549889be7fe"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"032f744f960f549b4fc6d64177622fa1d34b16e8a4a106812d5ddc37487cb435"},"mac":"f468643296c390300e4ff808b9db4831275565c813c77cc64283adaaa1bcdffd"},"id":"c74bc71b-28a0-42cd-9474-4ffc98276d84","version":3}`
-	ethAddress       = "0xf2ea9ce3a27862650a8d40d98329dc0bd403a0c3"
-	id1              = "5d72a512cea06f80"
-	addr1            = "A3jPvu6ZzrBNGUNyHTKU1G9LXcbMspjvtAQyTDdP4ADS4k3VMRudnrejc3w27gQWvPJbJEtKXkcde3yLM639RozHcBoehfZq8fQFVEwTmZ"
-	tx1              = "5fa93c5c40e9841fe0982cecf921a1a187a89ca2e32a9d2feffb9912e5a5f174"
+	moneroWalletAddr       = "http://127.0.0.1:6061/json_rpc"
+	moneroWalletName       = "monerot-estnet"
+	serviceAddr            = "127.0.0.1:6666"
+	gethRPC                = "http://127.0.0.1:8545"
+	dbPath                 = "test.db"
+	ethKeyContents         = `{"address":"f2ea9ce3a27862650a8d40d98329dc0bd403a0c3","crypto":{"cipher":"aes-128-ctr","ciphertext":"75b1c0181fee4c7fa634a49bac74dacb12dcc27ec157e8549b6374924c5b1272","cipherparams":{"iv":"87117ca98fd0652db342a549889be7fe"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"032f744f960f549b4fc6d64177622fa1d34b16e8a4a106812d5ddc37487cb435"},"mac":"f468643296c390300e4ff808b9db4831275565c813c77cc64283adaaa1bcdffd"},"id":"c74bc71b-28a0-42cd-9474-4ffc98276d84","version":3}`
+	ethAddress             = "0xf2ea9ce3a27862650a8d40d98329dc0bd403a0c3"
+	reserveContractAddress = "0x56D7C814700e6deD2Ab0173da2BdC57e1532bEd3"
+	id1                    = "d1925a00c1625c3c"
+	addr1                  = "A3jPvu6ZzrBNGUNyHTKU1G9LXcbMspjvtAQyTDdP4ADS4k3VMRudnrejc3w27gQWvPJbJEtKXkcde3yLM639RozHcGCtEPYWhbH7sbiFNN"
+	tx1                    = "5fa93c5c40e9841fe0982cecf921a1a187a89ca2e32a9d2feffb9912e5a5f174" // todo update with payment above
 )
 
 func TestService(t *testing.T) {
@@ -51,7 +52,7 @@ func TestService(t *testing.T) {
 	})
 	auth, err := bind.NewTransactor(strings.NewReader(ethKeyContents), "")
 	require.NoError(t, err)
-	srv, err := NewService(serviceAddr, moneroWalletName, mc, ec, auth, database)
+	srv, err := NewService(serviceAddr, moneroWalletName, reserveContractAddress, mc, ec, auth, database)
 	require.NoError(t, err)
 
 	go srv.Serve(ctx)
@@ -78,7 +79,7 @@ func TestService(t *testing.T) {
 	this is a temporary work around for a bug with the wallet rpc
 	*/
 	// revert this eventually once the bug is fixed
-	depResp.Address = "BbcQw9uY7AeEP9eCqYL7D7GzJjyYD9DHPDc2dMHx4Wc3foC8UVcda6geg68jXYoqYo4Ku2KE4GqVm23fJkBmiP9uRfr4LyF"
+	depResp.Address = "A7jzffQhMYxVBBD3HuWimYJHeVDS7kB3Za2n1LVjXcXqESHdDnT7xLfjcDeadHGc9mfhvNZSbJJsuFnTU6tyfuhseT37Akf7RPc4HFHEfr"
 	if resp, err := mc.Transfer(rpc.TransferOpts{
 		Priority:     wallet.PriorityElevated,
 		WalletName:   moneroWalletName,

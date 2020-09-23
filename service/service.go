@@ -8,11 +8,19 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bonedaddy/wxmr/bindings/reserve"
 	"github.com/bonedaddy/wxmr/db"
 	mclient "github.com/bonedaddy/wxmr/rpc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/go-chi/chi"
+)
+
+var (
+	devConfirmationCount  = 3
+	prodConfirmationCount = 12
+	dev                   = false
 )
 
 type Service struct {
@@ -22,9 +30,14 @@ type Service struct {
 	ec         *ethclient.Client
 	auth       *bind.TransactOpts
 	db         *db.Database
+	rsrv       *reserve.Reserve
 }
 
-func NewService(listenAddr, walletName string, mc *mclient.Client, ec *ethclient.Client, auth *bind.TransactOpts, database *db.Database) (*Service, error) {
+func NewService(listenAddr, walletName, reserveContractAddress string, mc *mclient.Client, ec *ethclient.Client, auth *bind.TransactOpts, database *db.Database) (*Service, error) {
+	rsrv, err := reserve.NewReserve(common.HexToAddress(reserveContractAddress), ec)
+	if err != nil {
+		return nil, err
+	}
 	srv := &Service{
 		walletName: walletName,
 		srv: &http.Server{
@@ -34,6 +47,7 @@ func NewService(listenAddr, walletName string, mc *mclient.Client, ec *ethclient
 		ec:   ec,
 		auth: auth,
 		db:   database,
+		rsrv: rsrv,
 	}
 	r := chi.NewRouter()
 	r.Get("/reserve_proof", srv.getReserveProof)
