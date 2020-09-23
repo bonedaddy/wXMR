@@ -50,6 +50,7 @@ func TestService(t *testing.T) {
 		os.Remove(dbPath)
 	})
 	auth, err := bind.NewTransactor(strings.NewReader(ethKeyContents), "")
+	require.NoError(t, err)
 	srv, err := NewService(serviceAddr, moneroWalletName, mc, ec, auth, database)
 	require.NoError(t, err)
 
