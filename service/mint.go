@@ -56,6 +56,7 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 				log.Println("failed to update mint transaction hash: ", err.Error())
 				return
 			}
+			log.Println("mint transaction sent: ", tx.Hash().String())
 			receipt, err := bind.WaitMined(s.ctx, s.ec, tx)
 			if err != nil {
 				log.Println("failed to wait for transaction to be mined: ", err.Error())
@@ -65,6 +66,7 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 				log.Println("transaction status indicates failure: ", err.Error())
 				return
 			}
+			log.Println("mint transaction mined waiting for confirmation")
 			var (
 				currentConfirmations *big.Int
 				confirmationsNeeded  = getRequiredConfirmations()
@@ -80,7 +82,7 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 			}
 			lastBlockChecked = number
 			for {
-				time.Sleep(time.Minute)
+				sleep()
 				number := s.getCurrentBlockNumber()
 				if number == nil {
 					return
@@ -99,6 +101,7 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 				return
 			}
 			log.Println("tokens minted and confirmed")
+			return
 		}
 		goto SLEEP
 	SLEEP:
@@ -120,4 +123,12 @@ func getRequiredConfirmations() *big.Int {
 		return big.NewInt(int64(devConfirmationCount))
 	}
 	return big.NewInt(int64(prodConfirmationCount))
+}
+
+func sleep() {
+	if dev {
+		time.Sleep(time.Second * time.Duration(devConfirmationCount))
+		return
+	}
+	time.Sleep(time.Minute)
 }

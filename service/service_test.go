@@ -14,8 +14,10 @@ import (
 	"time"
 
 	"github.com/bonedaddy/wxmr/db"
+	"github.com/bonedaddy/wxmr/eth"
 	"github.com/bonedaddy/wxmr/rpc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
 	"github.com/stretchr/testify/require"
@@ -29,14 +31,13 @@ var (
 	dbPath                 = "test.db"
 	ethKeyContents         = `{"address":"f2ea9ce3a27862650a8d40d98329dc0bd403a0c3","crypto":{"cipher":"aes-128-ctr","ciphertext":"75b1c0181fee4c7fa634a49bac74dacb12dcc27ec157e8549b6374924c5b1272","cipherparams":{"iv":"87117ca98fd0652db342a549889be7fe"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"032f744f960f549b4fc6d64177622fa1d34b16e8a4a106812d5ddc37487cb435"},"mac":"f468643296c390300e4ff808b9db4831275565c813c77cc64283adaaa1bcdffd"},"id":"c74bc71b-28a0-42cd-9474-4ffc98276d84","version":3}`
 	ethAddress             = "0xf2ea9ce3a27862650a8d40d98329dc0bd403a0c3"
-	reserveContractAddress = "0x56D7C814700e6deD2Ab0173da2BdC57e1532bEd3"
+	reserveContractAddress string
 	id1                    = "d1925a00c1625c3c"
 	addr1                  = "A3jPvu6ZzrBNGUNyHTKU1G9LXcbMspjvtAQyTDdP4ADS4k3VMRudnrejc3w27gQWvPJbJEtKXkcde3yLM639RozHcGCtEPYWhbH7sbiFNN"
 	tx1                    = "8226e4d3ab5a908e3fb91a8ad9def48444694764c953acf6826a8937467e7cf5"
 )
 
 func TestService(t *testing.T) {
-
 	// set dev mode
 	dev = true
 	// overide dev confirmation count to 1
@@ -60,6 +61,10 @@ func TestService(t *testing.T) {
 	})
 	auth, err := bind.NewTransactor(strings.NewReader(ethKeyContents), "")
 	require.NoError(t, err)
+
+	contractAddr, _, err := eth.DeployReserveContract(ctx, auth, ec)
+	require.NoError(t, err)
+	reserveContractAddress = contractAddr.String()
 	srv, err := NewService(ctx, serviceAddr, moneroWalletName, reserveContractAddress, mc, ec, auth, database)
 	require.NoError(t, err)
 
@@ -110,7 +115,15 @@ func TestService(t *testing.T) {
 	data, err = ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
 	log.Println("mint response: ", string(data))
-	time.Sleep(time.Minute * 1)
+	time.Sleep(time.Second * 20)
+	mint, err := srv.db.GetMint(id1)
+	require.NoError(t, err)
+	require.Equal(t, db.Confirmed, mint.State)
+	tx, err := srv.mc.GetTxID(srv.walletName, tx1)
+	require.NoError(t, err)
+	bal, err := srv.rsrv.BalanceOf(nil, common.HexToAddress(ethAddress))
+	require.NoError(t, err)
+	require.Equal(t, new(big.Int).SetUint64(tx.Transfer.Amount), bal)
 }
 
 // because we start the testenv geth node and set it
