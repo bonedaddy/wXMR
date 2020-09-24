@@ -2,7 +2,7 @@ module github.com/bonedaddy/wxmr
 
 go 1.14
 
-replace github.com/monero-ecosystem/go-monero-rpc-client v0.0.0-20200124164006-0afb4abdfc3c => github.com/bonedaddy/go-monero-rpc-client v0.0.1-rc2
+replace github.com/monero-ecosystem/go-monero-rpc-client v0.0.0-20200124164006-0afb4abdfc3c => github.com/bonedaddy/go-monero-rpc-client v0.0.1-rc3
 
 require (
 	github.com/ethereum/go-ethereum v1.9.21

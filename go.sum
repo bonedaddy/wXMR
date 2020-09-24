@@ -25,8 +25,8 @@ github.com/aristanetworks/goarista v0.0.0-20170210015632-ea17b1a17847 h1:rtI0fD4
 github.com/aristanetworks/goarista v0.0.0-20170210015632-ea17b1a17847/go.mod h1:D/tb0zPVXnP7fmsLZjtdUhSsumbK/ij54UXjjVgMGxQ=
 github.com/aws/aws-sdk-go v1.25.48/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
-github.com/bonedaddy/go-monero-rpc-client v0.0.1-rc2 h1:wAjrRwNKMTFwzUB2eKs8EWhYhbPogrvGYexAkbQtL1w=
-github.com/bonedaddy/go-monero-rpc-client v0.0.1-rc2/go.mod h1:ran93IT5k1+a/SaqwUF4gCoPYcMVbOw2qwPV8wIuZlQ=
+github.com/bonedaddy/go-monero-rpc-client v0.0.1-rc3 h1:5cLMRJpOWuDEJ3iKNSV6nGoCTdA+xxVAeLkCZA+fzo4=
+github.com/bonedaddy/go-monero-rpc-client v0.0.1-rc3/go.mod h1:ran93IT5k1+a/SaqwUF4gCoPYcMVbOw2qwPV8wIuZlQ=
 github.com/btcsuite/btcd v0.0.0-20171128150713-2e60448ffcc6 h1:Eey/GGQ/E5Xp1P2Lyx1qj007hLZfbi0+CoVeJruGCtI=
 github.com/btcsuite/btcd v0.0.0-20171128150713-2e60448ffcc6/go.mod h1:Dmm/EzmjnCiweXmzRIAiUWCInVmPgjkzgv5k4tVyXiQ=
 github.com/cespare/cp v0.1.0 h1:SE+dxFebS7Iik5LK0tsi1k9ZCxEaFX4AjQmoyA+1dJk=
