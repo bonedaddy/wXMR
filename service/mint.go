@@ -8,65 +8,73 @@ import (
 	"github.com/bonedaddy/wxmr/db"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"go.uber.org/zap"
 )
 
 func (s *Service) handleNewMint(paymentID, ethAddress string) {
+	logger := s.logger.With(
+		zap.String("payment.id", paymentID),
+		zap.String("eth.address", ethAddress),
+	)
+	logger.Info("processing new mint request")
 	for {
-		log.Println("getting payments")
 		resp, err := s.mc.GetPayments(s.walletName, paymentID)
 		if err != nil {
-			log.Println("failed to get payments: ", err.Error())
+			logger.Error("failed to retrieve payments", zap.Error(err))
 			return
 		}
 		if len(resp.Payments) < 0 {
-			log.Println("no payments found")
+			logger.Debug("no payments found, sleeping for 2 minutes")
 			time.Sleep(time.Minute * 2)
 			continue
 		}
+		logger = logger.With(zap.String("monero.tx_hash", resp.Payments[0].TxHash))
+		logger.Debug("found payment transaction, waiting for confirmations")
 		if len(resp.Payments) > 1 {
-			log.Println("ERROR: more than 2 payments found to this address")
+			logger.Warn("more than two transactions found for this payment id, we only process the first one")
 		}
-		log.Println("checking tx confirmation")
+	CONFIRM_START:
 		confirmed, err := s.mc.TxConfirmed(s.walletName, resp.Payments[0].TxHash)
 		if err != nil {
-			log.Println("failed to check tx confirmation status: ", err.Error())
+			logger.Error("failed to check tx confirmation status", zap.Error(err))
 			return
 		}
 		if !confirmed {
-			log.Println("tx is not yet confirmed")
+			logger.Debug("transaction not confirmed, sleepign for 2 minutes")
 			time.Sleep(time.Minute * 2)
-			continue
+			goto CONFIRM_START
 		}
 		if confirmed {
-			log.Println("monero received, minting coins")
+			logger.Debug("monero tx confirmed, starting wrapped token minting")
 			tx, err := s.rsrv.Mint(
 				s.auth,
 				common.HexToAddress(ethAddress),
 				new(big.Int).SetUint64(resp.Payments[0].Amount),
 			)
 			if err != nil {
-				log.Println("failed to mint tokens: ", err.Error())
+				logger.Error("failed to create mint transaction", zap.Error(err))
 				return
 			}
+			logger = logger.With(zap.String("ethereum.tx_hash", tx.Hash().String()))
 			if err := s.db.SetMintState(paymentID, db.Processing); err != nil {
-				log.Println("failed to update mint state: ", err.Error())
+				logger.Error("failed to update mint state", zap.Error(err))
 				return
 			}
 			if err := s.db.SetMintTx(paymentID, tx.Hash().String()); err != nil {
-				log.Println("failed to update mint transaction hash: ", err.Error())
+				logger.Error("failed to update mint transaction hash", zap.Error(err))
 				return
 			}
-			log.Println("mint transaction sent: ", tx.Hash().String())
+			logger.Debug("waiting for mint transaction to be mined")
 			receipt, err := bind.WaitMined(s.ctx, s.ec, tx)
 			if err != nil {
-				log.Println("failed to wait for transaction to be mined: ", err.Error())
+				logger.Error("failed to wait for transaction to be mined", zap.Error(err))
 				return
 			}
 			if receipt.Status != 1 {
-				log.Println("transaction status indicates failure: ", err.Error())
+				logger.Error("transaction encountered a failure")
 				return
 			}
-			log.Println("mint transaction mined waiting for confirmation")
+			logger.Debug("waiting for mint transaction to confirm")
 			var (
 				currentConfirmations *big.Int
 				confirmationsNeeded  = getRequiredConfirmations()
@@ -92,14 +100,15 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 				}
 				currentConfirmations = new(big.Int).Sub(number, lastBlockChecked)
 				if num := currentConfirmations.Cmp(confirmationsNeeded); num == 0 || num == 1 {
-					log.Println("tx confirmed")
+					logger.Debug("transaction confirmed")
 					break
 				}
 			}
 			if err := s.db.SetMintState(paymentID, db.Confirmed); err != nil {
-				log.Println("failed to set mint state: ", err.Error())
+				logger.Debug("failed to set mint state", zap.Error(err))
 				return
 			}
+			logger.Debug("successfully minted tokens")
 			log.Println("tokens minted and confirmed")
 			return
 		}
