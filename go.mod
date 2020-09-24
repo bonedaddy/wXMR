@@ -12,6 +12,8 @@ require (
 	github.com/segmentio/ksuid v1.0.3
 	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli/v2 v2.2.0
+	go.bobheadxi.dev/zapx/zapx v0.6.8
+	go.uber.org/zap v1.16.0
 	gorm.io/driver/sqlite v1.1.3
 	gorm.io/gorm v1.20.1
 )

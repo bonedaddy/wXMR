@@ -5,20 +5,17 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"math/big"
 	"net/http"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
+	"github.com/bonedaddy/wxmr/config"
 	"github.com/bonedaddy/wxmr/db"
-	"github.com/bonedaddy/wxmr/eth"
 	"github.com/bonedaddy/wxmr/rpc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
 	"github.com/stretchr/testify/require"
 )
@@ -45,28 +42,12 @@ func TestService(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	mc, err := rpc.NewClient(moneroWalletAddr)
-	require.NoError(t, err)
-	// ignore the error if it does not exist
-	mc.CreateWallet(moneroWalletName)
-	ec, err := ethclient.Dial(gethRPC)
-	require.NoError(t, err)
-	database, err := db.New(dbPath)
-	require.NoError(t, err)
+	cfg := config.DefaultConfig()
 	t.Cleanup(func() {
-		database.Close()
-		ec.Close()
-		mc.Close()
-		os.Remove(dbPath)
+		os.Remove(cfg.Database.Path)
+		os.Remove(cfg.Logger.FilePath)
 	})
-	auth, err := bind.NewTransactor(strings.NewReader(ethKeyContents), "")
-	require.NoError(t, err)
-
-	contractAddr, _, err := eth.DeployReserveContract(ctx, auth, ec)
-	require.NoError(t, err)
-	reserveContractAddress = contractAddr.String()
-	srv, err := NewService(ctx, serviceAddr, moneroWalletName, reserveContractAddress, mc, ec, auth, database)
-	require.NoError(t, err)
+	srv, err := NewService(ctx, config.DefaultConfig())
 
 	// start the server
 	go srv.Serve(ctx)
@@ -75,7 +56,7 @@ func TestService(t *testing.T) {
 	go ethMine(t, srv)
 
 	// prepare the test deposit
-	database.RegisterDeposit(addr1, id1)
+	srv.db.RegisterDeposit(addr1, id1)
 
 	callURL := "http://" + serviceAddr
 
@@ -97,7 +78,7 @@ func TestService(t *testing.T) {
 	so we simply use the returned information to make sure we can send a transfer to it, all further
 	testing occurs using a previously confirmed transaction
 	*/
-	if resp, err := mc.Transfer(rpc.TransferOpts{
+	if resp, err := srv.mc.Transfer(rpc.TransferOpts{
 		Priority:     wallet.PriorityElevated,
 		WalletName:   moneroWalletName,
 		Destinations: map[string]uint64{depResp.Address: wallet.Float64ToXMR(0.1)},
@@ -120,8 +101,7 @@ func TestService(t *testing.T) {
 	data, err = ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	log.Println("mint response: ", string(data))
-	time.Sleep(time.Second * 20)
+	time.Sleep(time.Second * time.Duration(devConfirmationCount*5))
 
 	mint, err := srv.db.GetMint(id1)
 	require.NoError(t, err)
@@ -154,7 +134,9 @@ func TestService(t *testing.T) {
 	proofCheck, err := srv.mc.CheckReserveProof(srv.walletName, proof.ReserveAddress, msg, proof.Signature)
 	require.NoError(t, err)
 	t.Logf("reserve proof: %#v\n", proofCheck)
-
+	cancel()
+	// defer wait closed so its the last defer on the stack before exit
+	srv.WaitClosed()
 }
 
 // because we start the testenv geth node and set it

@@ -6,15 +6,19 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/bonedaddy/wxmr/bindings/reserve"
+	"github.com/bonedaddy/wxmr/config"
 	"github.com/bonedaddy/wxmr/db"
+	"github.com/bonedaddy/wxmr/eth"
 	mclient "github.com/bonedaddy/wxmr/rpc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/go-chi/chi"
+	"go.uber.org/zap"
 )
 
 var (
@@ -31,25 +35,67 @@ type Service struct {
 	auth       *bind.TransactOpts
 	db         *db.Database
 	rsrv       *reserve.Reserve
+	logger     *zap.Logger
 	ctx        context.Context
+	closed     chan bool
+	mux        sync.RWMutex
 }
 
-func NewService(ctx context.Context, listenAddr, walletName, reserveContractAddress string, mc *mclient.Client, ec *ethclient.Client, auth *bind.TransactOpts, database *db.Database) (*Service, error) {
-	rsrv, err := reserve.NewReserve(common.HexToAddress(reserveContractAddress), ec)
+func NewService(ctx context.Context, cfg *config.Config) (*Service, error) {
+	ec, err := cfg.EthRPC()
 	if err != nil {
 		return nil, err
 	}
+	auth, err := cfg.EthAuth()
+	if err != nil {
+		return nil, err
+	}
+	mc, err := cfg.XmrRPC()
+	if err != nil {
+		return nil, err
+	}
+	db, err := cfg.DB()
+	if err != nil {
+		return nil, err
+	}
+	logger, err := cfg.ZapLogger()
+	if err != nil {
+		return nil, err
+	}
+	var (
+		contract *reserve.Reserve
+		addr     common.Address
+	)
+	// allows deploying a contract before the service starts up
+	if cfg.Ethereum.ReserveContractAddress == "" {
+		addr, contract, err = eth.DeployReserveContract(ctx, auth, ec)
+		if err != nil {
+			return nil, err
+		}
+		logger.Info("reserve contract deployed", zap.String("contract.address", addr.String()))
+	} else {
+		contract, err = reserve.NewReserve(
+			common.HexToAddress(cfg.Ethereum.ReserveContractAddress),
+			ec,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	srv := &Service{
-		walletName: walletName,
+		walletName: cfg.Monero.WalletName,
 		srv: &http.Server{
-			Addr: listenAddr,
+			Addr: cfg.Service.ListenAddr,
 		},
-		mc:   mc,
-		ec:   ec,
-		auth: auth,
-		db:   database,
-		rsrv: rsrv,
-		ctx:  ctx,
+		mc:     mc,
+		ec:     ec,
+		auth:   auth,
+		db:     db,
+		rsrv:   contract,
+		ctx:    ctx,
+		closed: make(chan bool, 1),
+		logger: logger,
 	}
 	r := chi.NewRouter()
 	r.Get("/reserve_proof", srv.getReserveProof)
@@ -59,10 +105,18 @@ func NewService(ctx context.Context, listenAddr, walletName, reserveContractAddr
 	return srv, nil
 }
 
+func (s *Service) WaitClosed() {
+	<-s.closed
+}
+
 func (s *Service) Serve(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 		s.srv.Close()
+		s.ec.Close()
+		s.mc.Close()
+		s.db.Close()
+		s.closed <- true
 	}()
 	return s.srv.ListenAndServe()
 }
