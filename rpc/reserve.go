@@ -2,26 +2,25 @@ package rpc
 
 import (
 	"errors"
-	"time"
 
 	"github.com/monero-ecosystem/go-monero-rpc-client/wallet"
 )
 
 // GetReserveProof returns a reserve proof for the given wallet
-func (c *Client) GetReserveProof(walletName string) (*wallet.ResponseGetReserveProof, error) {
+func (c *Client) GetReserveProof(walletName, message string) (*wallet.ResponseGetReserveProof, error) {
 	if err := c.OpenWallet(walletName); err != nil {
 		return nil, err
 	}
 	return c.mw.GetReserveProof(&wallet.RequestGetReserveProof{
 		All:     true,
-		Message: time.Now().UTC().String(),
+		Message: message,
 	})
 }
 
 // CheckReserveProof is used to validate a reserve proof
-func (c *Client) CheckReserveProof(walletName, reserveAddress, message, signature string) error {
+func (c *Client) CheckReserveProof(walletName, reserveAddress, message, signature string) (*wallet.ResponseCheckReserveProof, error) {
 	if err := c.OpenWallet(walletName); err != nil {
-		return err
+		return nil, err
 	}
 	resp, err := c.mw.CheckReserveProof(&wallet.RequestCheckReserveProof{
 		Address:   reserveAddress,
@@ -29,10 +28,10 @@ func (c *Client) CheckReserveProof(walletName, reserveAddress, message, signatur
 		Signature: signature,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !resp.Good {
-		return errors.New("invalid proof")
+		return nil, errors.New("invalid proof")
 	}
-	return nil
+	return resp, nil
 }

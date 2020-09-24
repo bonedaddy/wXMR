@@ -37,6 +37,15 @@ func (c *Client) GetAccounts(walletName string) (*wallet.ResponseGetAccounts, er
 	return c.mw.GetAccounts(&wallet.RequestGetAccounts{})
 }
 
+// GetWalletAddress is a convenience function to return wallet address information
+func (c *Client) GetWalletAddress(walletName string) (string, error) {
+	resp, err := c.GetAddress(walletName, 0)
+	if err != nil {
+		return "", err
+	}
+	return resp.Address, nil
+}
+
 // GetAddress returns address information for a given account index optionally filtered by subaddress index
 func (c *Client) GetAddress(walletName string, accountIndex uint64, addressIndex ...uint64) (*wallet.ResponseGetAddress, error) {
 	if err := c.OpenWallet(walletName); err != nil {
