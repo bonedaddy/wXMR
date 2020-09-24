@@ -50,7 +50,7 @@ func main() {
 				defer func() error {
 					return cl.Close()
 				}()
-				proof, err := cl.GetReserveProof(c.String("wallet.name"))
+				proof, err := cl.GetReserveProof(c.String("wallet.name"), "test")
 				if err != nil {
 					return err
 				}

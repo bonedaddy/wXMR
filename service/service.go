@@ -67,7 +67,36 @@ func (s *Service) Serve(ctx context.Context) error {
 	return s.srv.ListenAndServe()
 }
 
-func (s *Service) getReserveProof(w http.ResponseWriter, r *http.Request) {}
+func (s *Service) getReserveProof(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var req RequestReserveProof
+	if err := json.Unmarshal(data, &req); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	resp, err := s.mc.GetReserveProof(s.walletName, req.Message)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	walletAddr, err := s.mc.GetWalletAddress(s.walletName) // todo: replace with config variable to reduce rpc usage
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	data, err = json.Marshal(&ResponseReserveProof{Signature: resp.Signature, ReserveAddress: walletAddr})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.ServeContent(w, r, "", time.Time{}, bytes.NewReader(data))
+
+}
 
 func (s *Service) getDepositAddress(w http.ResponseWriter, r *http.Request) {
 	pinfo, err := s.mc.NewIntegratedAddress(s.walletName)

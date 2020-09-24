@@ -68,9 +68,12 @@ func TestService(t *testing.T) {
 	srv, err := NewService(ctx, serviceAddr, moneroWalletName, reserveContractAddress, mc, ec, auth, database)
 	require.NoError(t, err)
 
+	// start the server
 	go srv.Serve(ctx)
+
 	// start the hacky miner
 	go ethMine(t, srv)
+
 	// prepare the test deposit
 	database.RegisterDeposit(addr1, id1)
 
@@ -109,21 +112,49 @@ func TestService(t *testing.T) {
 
 	req, err = http.NewRequest("POST", callURL+"/mint", bytes.NewReader(data))
 	require.NoError(t, err)
+
 	resp, err = hc.Do(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
+
 	data, err = ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
+
 	log.Println("mint response: ", string(data))
 	time.Sleep(time.Second * 20)
+
 	mint, err := srv.db.GetMint(id1)
 	require.NoError(t, err)
 	require.Equal(t, db.Confirmed, mint.State)
+
 	tx, err := srv.mc.GetTxID(srv.walletName, tx1)
 	require.NoError(t, err)
+
 	bal, err := srv.rsrv.BalanceOf(nil, common.HexToAddress(ethAddress))
 	require.NoError(t, err)
 	require.Equal(t, new(big.Int).SetUint64(tx.Transfer.Amount), bal)
+
+	msg := time.Now().String()
+
+	data, err = json.Marshal(&RequestReserveProof{Message: msg})
+	require.NoError(t, err)
+
+	req, err = http.NewRequest("GET", callURL+"/reserve_proof", bytes.NewReader(data))
+	require.NoError(t, err)
+
+	resp, err = hc.Do(req)
+	require.NoError(t, err)
+
+	data, err = ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+
+	var proof ResponseReserveProof
+	require.NoError(t, json.Unmarshal(data, &proof))
+
+	proofCheck, err := srv.mc.CheckReserveProof(srv.walletName, proof.ReserveAddress, msg, proof.Signature)
+	require.NoError(t, err)
+	t.Logf("reserve proof: %#v\n", proofCheck)
+
 }
 
 // because we start the testenv geth node and set it
