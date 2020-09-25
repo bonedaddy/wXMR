@@ -43,8 +43,7 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 			logger.Debug("transaction not confirmed, sleepign for 2 minutes")
 			time.Sleep(time.Minute * 2)
 			goto CONFIRM_START
-		}
-		if confirmed {
+		} else {
 			logger.Debug("monero tx confirmed, starting wrapped token minting")
 			tx, err := s.rsrv.Mint(
 				s.auth,
@@ -112,9 +111,6 @@ func (s *Service) handleNewMint(paymentID, ethAddress string) {
 			log.Println("tokens minted and confirmed")
 			return
 		}
-		goto SLEEP
-	SLEEP:
-		time.Sleep(time.Minute * 2)
 	}
 }
 
