@@ -43,3 +43,11 @@ func (c *Client) Refresh(walletName string) error {
 	_, err := c.mw.Refresh(&wallet.RequestRefresh{})
 	return err
 }
+
+// BlockHeight returns the current block ehgiht
+func (c *Client) BlockHeight(walletName string) (*wallet.ResponseGetHeight, error) {
+	if err := c.OpenWallet(walletName); err != nil {
+		return nil, err
+	}
+	return c.mw.GetHeight()
+}
