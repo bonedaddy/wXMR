@@ -135,7 +135,6 @@ func TestService(t *testing.T) {
 	require.NoError(t, err)
 	t.Logf("reserve proof: %#v\n", proofCheck)
 	cancel()
-	// defer wait closed so its the last defer on the stack before exit
 	srv.WaitClosed()
 }
 
