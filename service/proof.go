@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/hex"
 	"math/big"
 	"time"
 
@@ -39,10 +40,19 @@ func (s *Service) submitProof() {
 		return
 	}
 	s.logger.Info("reserve proof posted", zap.String("tx.hash", tx.Hash().String()))
-	if _, err := bind.WaitMined(s.ctx, s.ec, tx); err != nil {
+	rcpt, err := bind.WaitMined(s.ctx, s.ec, tx)
+	if err != nil {
 		s.logger.Error("failed to wait for transaction to be mined", zap.Error(err))
 		return
 	}
 	s.logger.Info("reserve proof transaction mined", zap.String("tx.hash", tx.Hash().String()))
-	// todo: update database
+	if err := s.db.NewProof(
+		height.Height,
+		rcpt.BlockNumber.Int64(),
+		hex.EncodeToString(proofHash[:]),
+		proof.Signature,
+	); err != nil {
+		s.logger.Error("failed to store proof in database", zap.Error(err))
+		return
+	}
 }

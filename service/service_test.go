@@ -101,7 +101,7 @@ func TestService(t *testing.T) {
 	data, err = ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	time.Sleep(time.Second * time.Duration(devConfirmationCount*5))
+	time.Sleep(time.Second * time.Duration(devConfirmationCount*10))
 
 	mint, err := srv.db.GetMint(id1)
 	require.NoError(t, err)
@@ -134,6 +134,21 @@ func TestService(t *testing.T) {
 	proofCheck, err := srv.mc.CheckReserveProof(srv.walletName, proof.ReserveAddress, msg, proof.Signature)
 	require.NoError(t, err)
 	t.Logf("reserve proof: %#v\n", proofCheck)
+
+	proofs, err := srv.db.GetProofs()
+	require.NoError(t, err)
+	require.Len(t, proofs, 0)
+
+	srv.submitProof()
+	proofs, err = srv.db.GetProofs()
+	require.NoError(t, err)
+	require.Len(t, proofs, 1)
+
+	srv.submitProof()
+	proofs, err = srv.db.GetProofs()
+	require.NoError(t, err)
+	require.Len(t, proofs, 2)
+
 	cancel()
 	srv.WaitClosed()
 }
