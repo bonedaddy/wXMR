@@ -98,4 +98,46 @@ func TestDatabaste(t *testing.T) {
 			})
 		}
 	})
+
+	t.Run("Proof", func(t *testing.T) {
+		type args struct {
+			moneroHeight   uint64
+			ethereumHeight int64
+			proofHash      string
+			proofSig       string
+		}
+		tests := []struct {
+			name           string
+			args           args
+			wantError      bool
+			wantProofCount int
+		}{
+			{"1-Ok", args{1, 1, "1", "1"}, false, 1},
+			{"1-Fail", args{1, 1, "1", "1"}, true, 1},
+			{"2-Ok", args{2, 2, "2", "2"}, false, 2},
+			{"2-Fail", args{2, 2, "2", "2"}, true, 2},
+		}
+		for _, tt := range tests {
+			err := db.NewProof(
+				tt.args.moneroHeight,
+				tt.args.ethereumHeight,
+				tt.args.proofHash,
+				tt.args.proofSig,
+			)
+			if (err != nil) != tt.wantError {
+				t.Errorf("NewProof() err %v, wantErr %v", err, tt.wantError)
+			}
+			if !tt.wantError {
+				proofs, err := db.GetProofs()
+				require.NoError(t, err)
+				require.Len(t, proofs, tt.wantProofCount)
+			}
+			proof, err := db.GetProof(tt.args.proofHash)
+			require.NoError(t, err)
+			require.Equal(t, tt.args.ethereumHeight, proof.EthereumHeight)
+			require.Equal(t, tt.args.moneroHeight, proof.MoneroHeight)
+			require.Equal(t, tt.args.proofHash, proof.ProofHash)
+			require.Equal(t, tt.args.proofSig, proof.ProofSignature)
+		}
+	})
 }
