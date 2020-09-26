@@ -149,6 +149,14 @@ func TestService(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, proofs, 2)
 
+	height, err := srv.rsrv.LastProofHeight(nil)
+	require.NoError(t, err)
+
+	bcProof, err := srv.rsrv.Proofs(nil, height)
+	require.NoError(t, err)
+	// TODO: compare proof fields with 2nd proof
+	t.Logf("proof from contract: %#v\n", bcProof)
+
 	cancel()
 	srv.WaitClosed()
 }
